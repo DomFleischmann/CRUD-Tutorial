@@ -5,7 +5,8 @@ const bodyParser = require('body-parser');
 const app =  express();
 
 const MongoClient = require('mongodb').MongoClient;
-
+app.use(express.static('public'));
+app.use(bodyParser.json());
 var db;
 
 MongoClient.connect('mongodb://crud:crud@ds011472.mlab.com:11472/pdd-db', function(err,database){
@@ -45,6 +46,27 @@ MongoClient.connect('mongodb://crud:crud@ds011472.mlab.com:11472/pdd-db', functi
 
 		});
 	});
+    app.put ('/quotes',function  (req, res){
+        db.collection('quotes').findOneAndUpdate({name: 'Master Yoda'}, {
+            $set: {
+                name: req.body.name,
+                quote : req.body.quote
+            } 
+        }, {
+            sort: {_id: -1},
+            upsert: true
+        }, function (err, result) {
+           res.send(result); 
+        });
+        
+    });
+    app.delete('/quotes', function(req,res){
+        db.collection('quotes').findOneAndDelete({name: req.body.name},
+        function(err,result){
+                if(err) return res.send(500,err);
+                res.send('A darth vadar quote got deleted');
+        });
+    });
 });
 
 
